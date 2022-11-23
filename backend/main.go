@@ -5,17 +5,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	//"real-time-forum/backend/handlers"
-
+	"real-time-forum/backend/handlers"	
 	//"strings"
-
 	"text/template"
-
 	//	"github.com/gorilla/context"
-
 	_ "github.com/google/uuid"
 	//	_ "github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
+	//"handlers"
 )
 
 type User struct {
@@ -29,7 +26,6 @@ type User struct {
 }
 
 func dbConn() (db *sql.DB) {
-	
 
 	db, err := sql.Open("sqlite3", "rltforum.db")
 	if err != nil {
@@ -44,7 +40,7 @@ var tpl = template.Must(template.ParseGlob("templates/*.html"))
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("intekshandler ", r.RequestURI)
 
-	if r.URL.Path != "/"{
+	if r.URL.Path != "/" {
 		http.Error(w, "404 address NOT FOUND", http.StatusNotFound)
 		return
 	}
@@ -62,12 +58,12 @@ func main() {
 	http.HandleFunc("/dashboard", dashboardHandler)
 	http.HandleFunc("/add_post", addPostHandler)
 	http.HandleFunc("/likes", likeHandler)
-	http.HandleFunc("/comment", addCommentHandler)	
+	http.HandleFunc("/comment", addCommentHandler)
 	http.Handle("/asset/", http.StripPrefix("/asset/", http.FileServer(http.Dir("static"))))
 
 	foorum_dao = &FoorumDao{dbConn()}
 	server := Server{foorum_dao}
-	server.inithandlers()	
+	server.inithandlers()
 
 	log.Println("Server started on: http://localhost:8000")
 	//err := http.ListenAndServe(":8000", context.ClearHandler(http.DefaultServeMux)) // context to prevent memory leak
@@ -108,6 +104,5 @@ func setRoutes() http.Handler {
 
 	return mux
 }
-
 
 /////////////////////////////////////////////////////////////////////////
