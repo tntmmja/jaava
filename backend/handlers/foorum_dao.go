@@ -30,10 +30,9 @@ type FoorumDao struct {
 func (dao *FoorumDao) insert_post(user_id int, title string, text string) {
 	//dao.db.Query("INSERT INTO (title, text) VALUES (?, ?)")
 	_, err := dao.db.Exec("CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL, user_id INTEGER NOT NULL, title VARCHAR NOT NULL, text VARCHAR NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
-    if err != nil {
-        panic(err)
-    }
-
+	if err != nil {
+		panic(err)
+	}
 
 	stmt, err := dao.db.Prepare("INSERT INTO posts(user_id, title, text) VALUES (?, ?, ?)")
 	if err != nil {

@@ -1,11 +1,12 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
-	"real-time-forum/backend/handlers"	
+	"real-time-forum/backend/handlers"
+	"real-time-forum/backend/config"
+
 	//"strings"
 	"text/template"
 	//	"github.com/gorilla/context"
@@ -17,22 +18,15 @@ import (
 
 type User struct {
 	ID        int
+	Nickname  string `json:"nickname" validate:"required, gte=3"`
+	Age       int    `json: age`
+	Gender    string `json:"gender" validate:"required, gte=3"`
 	FirstName string `json:"firstname" validate:"required, gte=3"`
 	LastName  string `json:"lastname" validate:"required, gte=3"`
 	Email     string `json:"email"`
 	Password  string `json:"password"`
 	//CreatedDate time.Time `json:"createdDate"`
-	Cookie string
-}
-
-func dbConn() (db *sql.DB) {
-
-	db, err := sql.Open("sqlite3", "rltforum.db")
-	if err != nil {
-		panic(err.Error())
-	}
-	fmt.Println("DB Connected!!")
-	return db
+	Cookie string // cookie was also used as session id in forum
 }
 
 var tpl = template.Must(template.ParseGlob("templates/*.html"))
@@ -74,35 +68,5 @@ func main() {
 	}
 }
 
-func setRoutes() http.Handler {
-	mux := http.NewServeMux()
-
-	mux.HandleFunc("/favicon", func(w http.ResponseWriter, r *http.Request) {})
-	mux.HandleFunc("/", backend.IndexHandler)
-	mux.HandleFunc("/login", backend.LoginHandler)
-	mux.HandleFunc("/reg", backend.RegHandler)
-	mux.HandleFunc("/logout", backend.DeleteSession)
-	mux.HandleFunc("/newpost", backend.NewPostHandler)
-	mux.HandleFunc("/getcomments", backend.GetCommentsHandler)
-	mux.HandleFunc("/getallusers", backend.GetAllUsersHandler)
-	mux.HandleFunc("/getonline", backend.GetOnlineHandler)
-
-	//mux.HandleFunc("/ws", backend.HandleConnections)
-	mux.HandleFunc("/ws", backend.WebsocketHandler)
-
-	// API
-	mux.HandleFunc("/allposts", backend.GetAllPosts)
-	mux.HandleFunc("/post", backend.GetPostAndComments)
-	mux.HandleFunc("/commentpost", backend.CreatePostComment)
-	mux.HandleFunc("/userauth", backend.IsUserAuthenticated)
-	mux.HandleFunc("/getotherusers", backend.GetOtherUsers)
-	mux.HandleFunc("/getlast10messages", backend.GetLast10Messages)
-
-	fs := http.FileServer(http.Dir("./frontend"))
-	//go backend.HandleMessages()
-	mux.Handle("/frontend/", http.StripPrefix("/frontend/", fs))
-
-	return mux
-}
 
 /////////////////////////////////////////////////////////////////////////
