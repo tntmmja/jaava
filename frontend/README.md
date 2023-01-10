@@ -1,4 +1,6 @@
+how to run vue axios
 https://www.npmjs.com/package/vue-axios
+in frontend folder run
 npm install --save axios vue-axios
 
 

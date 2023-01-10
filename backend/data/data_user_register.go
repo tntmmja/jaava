@@ -1,17 +1,16 @@
 package data
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
-
 	"01.kood.tech/git/hr.tauno/real-time-forum/config"
-	"github.com/gorilla/mux"
-
 	"golang.org/x/crypto/bcrypt"
 )
 
-// see db on db_connect.go-s ka
+// see db on db_connect.go-s ka, nimega DbConn
+// kas peaks sama nimega panema
 var db *sql.DB
 
 type User struct {
@@ -30,11 +29,17 @@ type User struct {
 // is that the right place or should it be in db_connect.go
 // vt https://www.youtube.com/watch?v=1E_YycpCsXw
 // 28:46
+// we need init function to initialise the database
 func init() {
-	
-	db = config.dbConn()
+
+	config.DBConn()
+	 //whatever we get from that config file by calling the GetDB 
+	 // function 
+	db = config.GetDB()
 }
 
+//
+/*
 foorum_dao = &FoorumDao{dbConn()}
 	server := Server{foorum_dao}
 	server.inithandlers()
@@ -46,12 +51,10 @@ foorum_dao = &FoorumDao{dbConn()}
 		log.Fatal("500 Internal server error", http.StatusInternalServerError) // internal server error
 		return
 	}
+*/
 
-
-// mux-i jaoks tuleb ikka responsewriteriga ka midagi teha
-var RegisterHandler = func(router *mux.Route) {
+func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("registerhandler")
-	router.HandleFunc("/register/", controllers.)Methods("POST")
 	if r.Method == "POST" {
 		db := dbConn()
 		firstName := r.FormValue("FirstName")
@@ -65,6 +68,16 @@ var RegisterHandler = func(router *mux.Route) {
 			tpl.ExecuteTemplate(w, "Register", err)
 		}
 
+		//dt := time.Now()
+
+		//createdDateString := dt.Format("2006-01-02 15:04:05")
+
+		// Convert the time before inserting into the database
+		//createdDate, err := time.Parse("2006-01-02 15:04:05", createdDateString)
+		//if err != nil {
+		//	log.Fatal("Error converting the time:", err)
+		//	}
+
 		_, err = db.Exec("INSERT INTO user(firstname, lastname,email,password) VALUES(?,?,?,?)", firstName, lastName, email, password)
 		if err != nil {
 			fmt.Println("Error when inserting: ", err.Error())
@@ -76,13 +89,14 @@ var RegisterHandler = func(router *mux.Route) {
 				return
 			}
 
+			//fmt.Println("Error when inserting: ", err.Error())
+			//tpl.ExecuteTemplate(w, "registertaken.html", nil)
+			//panic(err.Error())
 		}
 		log.Println("=> Inserted: First Name: " + firstName + " | Last Name: " + lastName)
 
 		http.Redirect(w, r, "/login", http.StatusMovedPermanently)
 	} else if r.Method == "GET" {
 		tpl.ExecuteTemplate(w, "register.html", nil)
-		
 	}
 }
-
