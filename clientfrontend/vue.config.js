@@ -5,6 +5,6 @@ const { defineConfig } = require('@vue/cli-service')
 
 module.exports = {
   devServer: {
-    port: 8082, // or the port number you want the frontend to use
+    port: 8083, // or the port number you want the frontend to use
   },
 };
