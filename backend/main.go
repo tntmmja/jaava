@@ -8,18 +8,27 @@ import (
 	"log"
 	"net/http"
 
-	"01.kood.tech/git/hr.tauno/real-time-forum/config"
-	//"01.kood.tech/git/hr.tauno/real-time-forum/data"
-	//"01.kood.tech/git/hr.tauno/real-time-forum/handlers"
+	"github.com/tntmmja/jaava/config"
+	"github.com/tntmmja/jaava/data"
+	"github.com/tntmmja/jaava/handlers"
 	// _ "github.com/google/uuid"
 
 	//	_ "github.com/joho/godotenv"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/rs/cors"
 	//"handlers"
 )
 
-//var tpl = template.Must(template.ParseGlob("templates/*.html"))
+// var tpl = template.Must(template.ParseGlob("templates/*.html"))
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	// fmt.Println("intekshandler ", r.RequestURI)
@@ -28,34 +37,47 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	// 	http.Error(w, "404 address NOT FOUND", http.StatusNotFound)
 	// 	return
 	// }
+	fmt.Println("indexhandler")
 	fmt.Fprintf(w, "testing backend to frontend")
 	//tpl.ExecuteTemplate(w, "index.html", nil)
 }
+func LoggedHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./dist/logged-user.html")
+  }
 
 func main() {
-		// Create a new mux router. r on see router
-		//https://www.youtube.com/watch?v=1E_YycpCsXw
-		//seal on func main selline
+	
+	// Create a new mux router. r on see router
+	//https://www.youtube.com/watch?v=1E_YycpCsXw
+	//seal on func main selline
 	r := mux.NewRouter()
 	SetRoutes(r)
+
+
 	http.Handle("/", r) // Handle registers a new route with a matcher for the URL path. See Route.Path() and Route.Handler().
 	config.DBConn()
-	log.Fatal(http.ListenAndServe("localhost:8000", r))
-		/// miks siis kui config.DBConn on enne log.Fatal
-		//siis tuleb "DB Connected" aga kui siin viimasena, siis ei tule?
-	
+
+	// Add CORS middleware
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"http://localhost:8083"},
+	})
+	handler := c.Handler(r)
+
+	log.Fatal(http.ListenAndServe("localhost:8082", handler))
+	/// miks siis kui config.DBConn on enne log.Fatal
+	//siis tuleb "DB Connected" aga kui siin viimasena, siis ei tule?
 
 }
 
 // see voiks ka routes package all olla, aga praegu on siin
 var SetRoutes = func(router *mux.Router) {
-		//https://www.youtube.com/watch?v=1E_YycpCsXw
-		//route teeb 16 minutil
+	//https://www.youtube.com/watch?v=1E_YycpCsXw
+	//route teeb 16 minutil
 	router.HandleFunc("/", IndexHandler)
-	//router.HandleFunc("/register", data.RegisterHandler) // siia
-	// router.HandleFunc("/login", handlers.loginHandler)
+	router.HandleFunc("/register", data.RegisterHandler) // siia
+	router.HandleFunc("/login", handlers.LoginHandler)
 	// router.HandleFunc("/logouth", handlers.logoutHandler)
-	// router.HandleFunc("/dashboard", handlers.dashboardHandler)
+	router.HandleFunc("/loggedUser", handlers.LoggedHandler)
 	// router.HandleFunc("/add_post", handlers.addPostHandler)
 	// router.HandleFunc("/likes", handlers.likeHandler)
 	// router.HandleFunc("/comment", handlers.addCommentHandler)

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	
+
 	"01.kood.tech/git/hr.tauno/real-time-forum/config"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -33,8 +35,8 @@ type User struct {
 func init() {
 
 	config.DBConn()
-	 //whatever we get from that config file by calling the GetDB 
-	 // function 
+	//whatever we get from that config file by calling the GetDB
+	// function
 	db = config.GetDB()
 }
 
@@ -65,7 +67,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		password, err := bcrypt.GenerateFromPassword([]byte(r.FormValue("password")), bcrypt.DefaultCost)
 		if err != nil {
 			fmt.Println(err)
-			tpl.ExecuteTemplate(w, "Register", err)
+			//tpl.ExecuteTemplate(w, "Register", err)
 		}
 
 		//dt := time.Now()
@@ -82,7 +84,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Println("Error when inserting: ", err.Error())
 			if err.Error() == "UNIQUE constraint failed: user.email" {
-				tpl.ExecuteTemplate(w, "registertaken.html", nil)
+				//tpl.ExecuteTemplate(w, "registertaken.html", nil)
 				//panic(err.Error())
 			} else {
 				http.Error(w, "500 internal server error", http.StatusInternalServerError)
@@ -97,6 +99,10 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 		http.Redirect(w, r, "/login", http.StatusMovedPermanently)
 	} else if r.Method == "GET" {
-		tpl.ExecuteTemplate(w, "register.html", nil)
+		//tpl.ExecuteTemplate(w, "register.html", nil)
 	}
+}
+
+func dbConn() {
+	panic("unimplemented")
 }

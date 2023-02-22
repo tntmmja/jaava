@@ -1,0 +1,88 @@
+package handlers
+
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+	"strings"
+	"time"
+
+	"01.kood.tech/git/hr.tauno/real-time-forum/config"
+	"01.kood.tech/git/hr.tauno/real-time-forum/data"
+
+	//"text/template"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/jinzhu/gorm"
+	"golang.org/x/crypto/bcrypt"
+)
+
+var db *gorm.DB
+
+func init() {
+	config.DBConn()
+	db, _ = gorm.Open("postgres", config.GetDB())
+}
+
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("loginhandler")
+	decoder := json.NewDecoder(r.Body)
+	var user data.User
+	//db := config.GetDB()
+	err := decoder.Decode(&user)
+	if err != nil {
+		log.Println(err)
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+	defer r.Body.Close()
+
+	var userData data.User
+	if strings.Contains(user.Email, "@") {
+		if err := db.Where("email = ?", user.Email).First(&userData).Error; err != nil {
+			respondWithError(w, http.StatusBadRequest, "Email not found")
+			return
+		}
+	} else {
+		if err := db.Where("nickname = ?", user.Email).First(&userData).Error; err != nil {
+			respondWithError(w, http.StatusBadRequest, "Nickname not found")
+			return
+		}
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(userData.Password), []byte(user.Password)); err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Incorrect password")
+		return
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":    userData.ID,
+		"email": userData.Email,
+		"exp":   time.Now().Add(time.Hour * 72).Unix(),
+	})
+
+	tokenString, err := token.SignedString([]byte("secret"))
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Error while signing the token")
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, map[string]string{"token": tokenString})
+}
+
+func respondWithJSON(w http.ResponseWriter, code int, payload map[string]string) {
+	response, err := json.Marshal(payload)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	_, _ = w.Write(response)
+}
+
+func respondWithError(w http.ResponseWriter, i int, s string) {
+	panic("unimplemented")
+}

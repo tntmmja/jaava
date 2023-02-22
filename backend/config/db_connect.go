@@ -3,12 +3,14 @@ package config
 import (
 	"database/sql"
 	"fmt"
+
 	_ "github.com/mattn/go-sqlite3"
 )
 
 var (
 	DbConn *sql.DB
 )
+
 // whole point of this will be to return variable db, which
 //will help the other files to interact the db
 
@@ -19,18 +21,20 @@ var (
 func DBConn() {
 	db, err := sql.Open("sqlite3", "rltforum.db")
 	if err != nil {
-		panic(err.Error())  // kas lihtsalt panic(err) ei sobi
+		panic(err.Error()) // kas lihtsalt panic(err) ei sobi
 	}
 	fmt.Println("DB Connected!!")
 	DbConn = db
 }
 
 // the purpose of this FILE is to return a DbConn variable
-// which will help us to talk to database, other files can 
+// which will help us to talk to database, other files can
 // talk to database easily.
 // dont exactly get the polint of this function
 func GetDB() *sql.DB {
+	fmt.Println("DbConn ka!!")
 	return DbConn
+
 }
 
 // FoorumDao will be used by functions which write into and out of database
