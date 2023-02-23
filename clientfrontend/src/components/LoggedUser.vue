@@ -15,6 +15,13 @@
 <script>
 import axios from 'axios'
 export default {
+  name: 'LoggedUser',
+  mounted() {
+    console.log('Component mounted!');
+  },
+
+
+
   data() {
     return {
       user: null,

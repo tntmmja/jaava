@@ -102,8 +102,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			
 		}
 		fmt.Println("loginni cek", user.ID, user.Nickname, user.Email, user.Password)
+		
 		errf := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password))
 		if errf != nil && errf == bcrypt.ErrMismatchedHashAndPassword { //Password does not match!
+			fmt.Println("loginni password ei sobi")
 			fmt.Println(errf)
 
 			
