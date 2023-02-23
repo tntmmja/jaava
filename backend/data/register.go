@@ -94,6 +94,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 	fmt.Println("hakka uuser tabelit prepeerima")
 	stmt, err := db.Prepare("INSERT INTO user (nickname, age, gender, firstName, lastName, email, password) VALUES (?, ?, ?, ?, ?, ?, ?)")
+	fmt.Println("hakka uuser tabelit prepeerima2")
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return

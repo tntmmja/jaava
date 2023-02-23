@@ -1,4 +1,5 @@
 -- SQLite
+-- kasu kaivitamiseks parem klops - run selected query
 /*
 CREATE TABLE IF NOT EXISTS user (
 id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
@@ -29,4 +30,7 @@ sessionID TEXT);
 */
 
 -- kustutab tabeli posts
-drop table user
+/*drop table user
+*/
+
+ALTER TABLE user RENAME COLUMN username TO nickname;
