@@ -13,9 +13,9 @@
       </div>
       <div>
         <label for="gender">Gender:</label>
-        <input type="radio" id="gender" value="male" v-model="gender" required />Male
-        <input type="radio" id="gender" value="female" v-model="gender" required />Female
-        <input type="radio" id="gender" value="other" v-model="gender" required />Other
+        <input type="radio" id="gender1" value="male" v-model="gender" required />Male
+        <input type="radio" id="gender2" value="female" v-model="gender" required />Female
+        <input type="radio" id="gender3" value="other" v-model="gender" required />Other
       </div>
       <div>
         <label for="firstName">First Name:</label>

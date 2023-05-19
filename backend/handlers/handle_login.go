@@ -14,9 +14,10 @@ import (
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/google/uuid"
 	"github.com/tntmmja/jaava/config"
 	"github.com/tntmmja/jaava/data"
-	"github.com/google/uuid"
 
 	//"text/template"
 
@@ -69,6 +70,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if err != nil {
+			log.Println("valed andmed")
 			//tpl.ExecuteTemplate(w, "loginwrong.html", nil)
 			http.Error(w, "500 internal server error", http.StatusInternalServerError)
 			return
@@ -86,7 +88,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			var password, nickName, email string
 			//var createdDate time.Time
 			err = checkUser.Scan(&id, &password, &nickName, &email)
+
+			log.Println("------------------------", id, password, nickName, email)
 			if err != nil {
+				fmt.Println("------------", err)
 				http.Error(w, "500 internal server error", http.StatusInternalServerError)
 				return
 				//panic(err.Error())
@@ -99,16 +104,16 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if user.ID == 0 {
-			
+			http.Error(w, "Valed logimisandmed", 401)
+			return
 		}
 		fmt.Println("loginni cek", user.ID, user.Nickname, user.Email, user.Password)
-		
+
 		errf := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password))
 		if errf != nil && errf == bcrypt.ErrMismatchedHashAndPassword { //Password does not match!
 			fmt.Println("loginni password ei sobi")
 			fmt.Println(errf)
 
-			
 		} else {
 			sessionID := uuid.New().String() //generates random text
 			fmt.Println("loginsessionid1", sessionID)
@@ -129,12 +134,30 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 				//panic(err.Error())
 			}
 
-			//w.Header().Add("Set-Cookie", "mycookie="+sessionID+"; Max-Age = 300")
+			w.Header().Add("Set-Cookie", "mycookie="+sessionID+"; Max-Age = 300")
+			w.Write([]byte{})
 			fmt.Println("suunaloggeduser")
-			
+			w.WriteHeader(http.StatusOK)
+
+			var resp = MyResponse{
+				Success:   true,
+				SessionID: sessionID,
+			}
+
+			jsonResp, err := json.Marshal(resp)
+			if err != nil {
+				log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+			}
+			w.Write(jsonResp)
+
 			return
 		}
 	} else if r.Method == "GET" {
-		
+
 	}
+}
+
+type MyResponse struct {
+	Success   bool   `json:"success"`
+	SessionID string `json:"sessionID"`
 }
