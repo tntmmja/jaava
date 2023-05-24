@@ -33,7 +33,8 @@ export default {
       this.$router.push({ name: 'login' });
     } else {
       // Make an API call to fetch the user data using the session ID
-      axios.get(`http://localhost:8082/login/${sessionID}`)
+     // axios.get(`http://localhost:8082/login/${sessionID}`)
+      axios.get(`http://localhost:8082/login/`)
         .then(response => {
           this.user = response.data;
         })

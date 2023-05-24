@@ -1,4 +1,5 @@
-<!-- //see ei saada midagi,aga vues errorit ka pole -->
+<!-- //see ei saada midagi,aga vues errorit ka pole
+nuud vist saadab -->
 
 <template>
   <div>
