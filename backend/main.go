@@ -5,12 +5,14 @@ import (
 	//	"github.com/gorilla/context"
 
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 
 	"github.com/tntmmja/jaava/config"
 	"github.com/tntmmja/jaava/data"
 	"github.com/tntmmja/jaava/handlers"
+
 	// _ "github.com/google/uuid"
 
 	//	_ "github.com/joho/godotenv"
@@ -20,6 +22,7 @@ import (
 	"github.com/rs/cors"
 	//"handlers"
 )
+
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -28,32 +31,43 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func IndexHandler(w http.ResponseWriter, r *http.Request) {	
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("indexhandler")
 	fmt.Fprintf(w, "testing backend to frontend")
-	//tpl.ExecuteTemplate(w, "index.html", nil)
-}
-// func LoggedHandler(w http.ResponseWriter, r *http.Request) {
-// 	http.ServeFile(w, r, "./dist/logged-user.html")
-//   }
-func handleWebSocket(w http.ResponseWriter, r *http.Request) {
-    conn, err := upgrader.Upgrade(w, r, nil)
-    if err != nil {
-        log.Println(err)
-        return
-    }
-    defer conn.Close()
-    
-    // handle WebSocket connection here
+	tmpl, err := template.ParseFiles("../clientfrontend/templates/index.html")
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(w, nil)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	fmt.Println("indexhandle2")
 }
 
-func main() {	
+func handleWebSocket(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer conn.Close()
+
+	// handle WebSocket connection here
+}
+
+func main() {
 	r := mux.NewRouter()
 	SetRoutes(r)
 
 	http.Handle("/", r) // Handle registers a new route with a matcher for the URL path. See Route.Path() and Route.Handler().
 	config.DBConn()
-	// Add CORS middleware
+	// CORS is from old code
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"http://localhost:8083"},
 	})
@@ -65,7 +79,6 @@ func main() {
 
 }
 
-// see voiks ka routes package all olla, aga praegu on siin
 var SetRoutes = func(router *mux.Router) {
 	router.HandleFunc("/socket", handleWebSocket)
 	router.HandleFunc("/", IndexHandler)
